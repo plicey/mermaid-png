@@ -190,7 +190,7 @@ Mermaid to PNG Converter
 ========================
 
 Usage:
-  node mermaid-to-png.js <input.mmd> [output.png] [options]
+  mmdpng <input.mmd> [output.png] [options]
 
 Options:
   --theme <theme>       Mermaid theme: default, dark, forest, neutral
@@ -200,9 +200,9 @@ Options:
   --bg <color>          Background color (default: white)
 
 Examples:
-  node mermaid-to-png.js diagram.mmd
-  node mermaid-to-png.js diagram.mmd output.png
-  node mermaid-to-png.js diagram.mmd output.png --theme dark --scale 3
+  mmdpng diagram.mmd
+  mmdpng diagram.mmd output.png
+  mmdpng diagram.mmd output.png --theme dark --scale 3
 `);
     process.exit(0);
   }
