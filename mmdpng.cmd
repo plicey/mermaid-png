@@ -1,2 +1,2 @@
 @echo off
-node "%~dp0mermaid-to-png.js" %*
+bun "%~dp0mermaid-to-png.js" %*
