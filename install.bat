@@ -14,17 +14,10 @@ if "%INSTALL_DIR:~-1%"=="\" set "INSTALL_DIR=%INSTALL_DIR:~0,-1%"
 echo Installing from: %INSTALL_DIR%
 echo.
 
-:: Check if already in PATH
-echo Current PATH:
-for %%A in ("%PATH:;=" "%") do (
-    echo   %%~A
-)
-echo.
-
-:: Check if already installed
-echo %PATH% | find /i "%INSTALL_DIR%" >nul
+:: Check if already in User PATH using PowerShell
+powershell -Command "[Environment]::GetEnvironmentVariable('PATH', 'User')" | find /i "%INSTALL_DIR%" >nul
 if %errorlevel% equ 0 (
-    echo [WARNING] This directory is already in your PATH.
+    echo [WARNING] This directory is already in your User PATH.
     echo.
     set /p CONTINUE="Do you want to continue anyway? (Y/N): "
     if /i not "!CONTINUE!"=="Y" (
@@ -34,10 +27,11 @@ if %errorlevel% equ 0 (
     )
 )
 
-:: Add to User PATH (requires admin privileges for System PATH)
+:: Add to User PATH using PowerShell (handles long paths correctly)
 echo.
 echo Adding to User PATH environment variable...
-setx PATH "%PATH%;%INSTALL_DIR%" >nul
+
+powershell -Command "$userPath = [Environment]::GetEnvironmentVariable('PATH', 'User'); $installDir = '%INSTALL_DIR%'; if ($userPath -notlike \"*$installDir*\") { $newPath = if ($userPath -eq '') { $installDir } else { $userPath + ';' + $installDir }; [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User'); exit 0 } else { exit 1 }"
 
 if %errorlevel% equ 0 (
     echo.
@@ -54,14 +48,7 @@ if %errorlevel% equ 0 (
     echo.
 ) else (
     echo.
-    echo [ERROR] Failed to update PATH environment variable.
-    echo.
-    echo Possible reasons:
-    echo   - Insufficient permissions
-    echo   - PATH is too long (Windows has a limit)
-    echo.
-    echo You can manually add this directory to your PATH:
-    echo   %INSTALL_DIR%
+    echo [INFO] Directory may already be in PATH or update not needed.
     echo.
 )
 
