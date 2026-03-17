@@ -36,16 +36,12 @@ try {
  * @param {string} mermaidCode - The Mermaid diagram code
  * @param {string} outputPath - Path to save the PNG file
  * @param {object} options - Configuration options
- * @param {number} options.width - Output width (default: 1200)
- * @param {number} options.height - Output height (default: 800)
  * @param {string} options.backgroundColor - Background color (default: white)
  * @param {string} options.theme - Mermaid theme: default, dark, forest, neutral (default: default)
  * @param {number} options.scale - Scale factor for higher resolution (default: 2)
  */
 async function mermaidToPng(mermaidCode, outputPath, options = {}) {
   const {
-    width = 1200,
-    height = 800,
     backgroundColor = 'white',
     theme = 'default',
     scale = 2
@@ -60,8 +56,8 @@ async function mermaidToPng(mermaidCode, outputPath, options = {}) {
 
     const page = await browser.newPage();
     
-    // Set viewport
-    await page.setViewport({ width, height, deviceScaleFactor: scale });
+    // Set viewport (only scale matters, dimensions are auto-sized by SVG)
+    await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: scale });
 
     // HTML template with Mermaid CDN
     const html = `
@@ -194,8 +190,6 @@ Usage:
 
 Options:
   --theme <theme>       Mermaid theme: default, dark, forest, neutral
-  --width <pixels>      Output width (default: 1200)
-  --height <pixels>     Output height (default: 800)
   --scale <factor>      Scale factor for resolution (default: 2)
   --bg <color>          Background color (default: white)
 
@@ -215,10 +209,6 @@ Examples:
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--theme' && args[i + 1]) {
       options.theme = args[++i];
-    } else if (args[i] === '--width' && args[i + 1]) {
-      options.width = parseInt(args[++i], 10);
-    } else if (args[i] === '--height' && args[i + 1]) {
-      options.height = parseInt(args[++i], 10);
     } else if (args[i] === '--scale' && args[i + 1]) {
       options.scale = parseInt(args[++i], 10);
     } else if (args[i] === '--bg' && args[i + 1]) {
