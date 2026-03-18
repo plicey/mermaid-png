@@ -6,9 +6,11 @@
  * A Bun/Node.js script to convert Mermaid diagrams to PNG images.
  *
  * Installation:
- *   bun install puppeteer
+ *   bun install
  *   # or
- *   npm install puppeteer
+ *   npm install
+ *
+ * This will install both puppeteer and mermaid as local dependencies.
  *
  * Usage:
  *   bun mermaid-to-png.js <input.mmd> [output.png]
@@ -29,14 +31,29 @@
 const fs = require('fs');
 const path = require('path');
 
-// Check if puppeteer is available
+// Check if dependencies are available
 let puppeteer;
+let mermaidJsPath;
+
 try {
   puppeteer = require('puppeteer');
 } catch (e) {
   console.error('Error: puppeteer is not installed.');
-  console.error('Please install it with: bun install puppeteer');
-  console.error('Or with: npm install puppeteer');
+  console.error('Please install dependencies with: bun install');
+  console.error('Or with: npm install');
+  process.exit(1);
+}
+
+// Check if mermaid is installed locally
+try {
+  mermaidJsPath = path.join(__dirname, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+  if (!fs.existsSync(mermaidJsPath)) {
+    throw new Error('mermaid.min.js not found');
+  }
+} catch (e) {
+  console.error('Error: mermaid is not installed locally.');
+  console.error('Please install dependencies with: bun install');
+  console.error('Or with: npm install');
   process.exit(1);
 }
 
@@ -68,13 +85,16 @@ async function mermaidToPng(mermaidCode, outputPath, options = {}) {
     // Set viewport (only scale matters, dimensions are auto-sized by SVG)
     await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: scale });
 
-    // HTML template with Mermaid CDN
+    // Read local mermaid.min.js and embed it inline
+    const mermaidJs = fs.readFileSync(mermaidJsPath, 'utf-8');
+
+    // HTML template with embedded local mermaid
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+        <script>${mermaidJs}</script>
         <style>
           body {
             margin: 0;
@@ -106,13 +126,13 @@ async function mermaidToPng(mermaidCode, outputPath, options = {}) {
       </html>
     `;
 
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     // Wait for mermaid to render
     await page.waitForFunction(() => {
       const mermaidDiv = document.querySelector('.mermaid');
       return mermaidDiv && mermaidDiv.querySelector('svg');
-    }, { timeout: 10000 });
+    }, { timeout: 30000 });
 
     // Get the SVG element
     const svgElement = await page.$('.mermaid');
@@ -192,7 +212,12 @@ async function main() {
   if (args.length === 0) {
     console.log(`
 Mermaid to PNG Converter
-========================
+=======================
+
+Installation:
+  bun install
+  # or
+  npm install
 
 Usage:
   mmdpng <input.mmd> [output.png] [options]
