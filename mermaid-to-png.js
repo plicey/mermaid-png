@@ -65,20 +65,29 @@ try {
  * @param {string} options.backgroundColor - Background color (default: white)
  * @param {string} options.theme - Mermaid theme: default, dark, forest, neutral (default: default)
  * @param {number} options.scale - Scale factor for higher resolution (default: 2)
+ * @param {boolean} options.noSandbox - Disable Puppeteer sandbox (WARNING: reduces security, use only in trusted environments)
  */
 async function mermaidToPng(mermaidCode, outputPath, options = {}) {
   const {
     backgroundColor = 'white',
     theme = 'default',
-    scale = 2
+    scale = 2,
+    noSandbox = false
   } = options;
 
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    const launchOptions = {
+      headless: 'new'
+    };
+    
+    // Only disable sandbox if explicitly requested (e.g., for containerized environments)
+    // WARNING: Disabling sandbox reduces security - only use in trusted environments
+    if (noSandbox) {
+      launchOptions.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+    }
+    
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     
@@ -119,7 +128,7 @@ async function mermaidToPng(mermaidCode, outputPath, options = {}) {
           mermaid.initialize({
             startOnLoad: true,
             theme: '${theme}',
-            securityLevel: 'loose'
+            securityLevel: 'strict'
           });
         </script>
       </body>
@@ -226,6 +235,7 @@ Options:
   --theme <theme>       Mermaid theme: default, dark, forest, neutral
   --scale <factor>      Scale factor for resolution (default: 2)
   --bg <color>          Background color (default: white)
+  --no-sandbox          Disable browser sandbox (WARNING: reduces security)
 
 Examples:
   mmdpng diagram.mmd
@@ -247,6 +257,8 @@ Examples:
       options.scale = parseInt(args[++i], 10);
     } else if (args[i] === '--bg' && args[i + 1]) {
       options.backgroundColor = args[++i];
+    } else if (args[i] === '--no-sandbox') {
+      options.noSandbox = true;
     } else if (!args[i].startsWith('--')) {
       outputPath = args[i];
     }

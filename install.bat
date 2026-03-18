@@ -28,10 +28,13 @@ if %errorlevel% equ 0 (
 )
 
 :: Add to User PATH using PowerShell (handles long paths correctly)
+:: Using environment variable to avoid command injection from path with special characters
 echo.
 echo Adding to User PATH environment variable...
 
-powershell -Command "$userPath = [Environment]::GetEnvironmentVariable('PATH', 'User'); $installDir = '%INSTALL_DIR%'; if ($userPath -notlike \"*$installDir*\") { $newPath = if ($userPath -eq '') { $installDir } else { $userPath + ';' + $installDir }; [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User'); exit 0 } else { exit 1 }"
+:: Pass the install directory via environment variable to avoid PowerShell injection
+set "PS_INSTALL_DIR=%INSTALL_DIR%"
+powershell -NoProfile -Command "$installDir = $env:PS_INSTALL_DIR; $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User'); if ($userPath -notlike \"*$installDir*\") { $newPath = if ([string]::IsNullOrEmpty($userPath)) { $installDir } else { $userPath + ';' + $installDir }; [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User'); exit 0 } else { exit 1 }"
 
 if %errorlevel% equ 0 (
     echo.
