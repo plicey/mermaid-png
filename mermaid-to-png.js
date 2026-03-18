@@ -2,17 +2,25 @@
 
 /**
  * Mermaid to PNG Converter
- * 
- * A Node.js script to convert Mermaid diagrams to PNG images.
- * 
+ *
+ * A Bun/Node.js script to convert Mermaid diagrams to PNG images.
+ *
  * Installation:
+ *   bun install puppeteer
+ *   # or
  *   npm install puppeteer
- * 
+ *
  * Usage:
+ *   bun mermaid-to-png.js <input.mmd> [output.png]
+ *   # or
  *   node mermaid-to-png.js <input.mmd> [output.png]
+ *
+ * Examples:
+ *   bun mermaid-to-png.js diagram.mmd diagram.png
+ *   bun mermaid-to-png.js diagram.mmd  # outputs to diagram.png
  *   node mermaid-to-png.js diagram.mmd diagram.png
  *   node mermaid-to-png.js diagram.mmd  # outputs to diagram.png
- * 
+ *
  * Or use programmatically:
  *   const { mermaidToPng } = require('./mermaid-to-png');
  *   await mermaidToPng('graph TD; A-->B;', 'output.png');
@@ -27,7 +35,8 @@ try {
   puppeteer = require('puppeteer');
 } catch (e) {
   console.error('Error: puppeteer is not installed.');
-  console.error('Please install it with: npm install puppeteer');
+  console.error('Please install it with: bun install puppeteer');
+  console.error('Or with: npm install puppeteer');
   process.exit(1);
 }
 
