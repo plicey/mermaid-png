@@ -1,4 +1,11 @@
 {
+  "name": "mermaid-to-png",
+  "version": "1.0.0",
+  "description": "Convert Mermaid diagrams to PNG images",
+  "main": "mermaid-to-png.js",
+  "bin": {
+    "mmdpng": "./mermaid-to-png.js"
+  },
   "dependencies": {
     "mermaid": "^11.13.0",
     "puppeteer": "^24.39.1"
